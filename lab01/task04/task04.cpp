@@ -1,8 +1,13 @@
-
+#include <boost/timer.hpp>
 #include <iostream>
 #include <vector>
 
-
+/*
+* Время работы
+* k = 5, n = 10 - < 0.001
+* k = 5, n = 25 -  0.008s
+* k = 5, n = 100 - 10s
+*/
 
 std::vector<int> create_first(int n, int k)
 {
@@ -41,16 +46,20 @@ void create_all(int n, int k, void(*output)(std::vector<int>))
 
 void print(std::vector<int> v)
 {
-    for (int i = 0; i < v.size(); ++i)
-    {
-        std::cout << v[i] << " ";
-    }
-    std::cout << std::endl;
+    //for (int i = 0; i < v.size(); ++i)
+    //{
+    //    std::cout << v[i] << " ";
+    //}
+    //std::cout << std::endl;
 }
 
 int main()
 {
+    boost::timer t;
+    t.restart();
     void(*print_result)(std::vector<int>) = print;
-    create_all(5, 9, print_result);
+    create_all(5, 25, print_result);
+    double duration = t.elapsed();
+    std::cout << duration << std::endl;
 }
 
