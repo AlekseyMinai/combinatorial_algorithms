@@ -62,4 +62,3 @@ int main()
     double duration = t.elapsed();
     std::cout << duration << std::endl;
 }
-

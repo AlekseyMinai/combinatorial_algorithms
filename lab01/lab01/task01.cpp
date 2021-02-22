@@ -5,7 +5,7 @@
 
 int main()
 {
-    std::vector<size_t> v = { 7, 1, 12, 20, 30, 22, 10, 55, 1};
+    std::vector<size_t> v = { 1, 2, 3, 4, 5};
     boost::timer t;
     t.restart();
     std::sort(v.begin(), v.end());
