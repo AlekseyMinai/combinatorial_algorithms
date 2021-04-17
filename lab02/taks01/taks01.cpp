@@ -62,15 +62,17 @@ void println(std::vector<std::vector<int>> matrix)
 struct TreeNode
 {
 	int value;
+	int parent;
 	int enter;
 	int exit;
 	std::vector<TreeNode*> children;
 	std::vector<TreeNode*> back_edge;
 
-	TreeNode(int value, int enter)
+	TreeNode(int value, int parent, int enter)
 	{
 		this->value = value;
 		this->enter = enter;
+		this->parent = parent;
 		exit = -1;
 	}
 
@@ -87,7 +89,26 @@ struct TreeNode
 void printTreeNode(TreeNode *node)
 {
 	std::cout << "[" << node->value + 1 << "] - ";
-	std::cout << "{" << node->enter + 1 << "," << node->exit + 1 << "}" << std::endl;
+	std::cout << "{" << node->enter + 1 << "," << node->exit + 1 << "}";
+
+	if (node->back_edge.size() > 0)
+	{
+		std::cout << " - back_edges - (";
+	}
+	for (int i = 0; i < node->back_edge.size(); i++)
+	{
+		std::cout << node->back_edge[i]->value + 1;
+		if (i < node->back_edge.size() - 1)
+		{
+			std::cout << ", ";
+		} 
+		else
+		{
+			std::cout << ");";
+		}
+	}
+	std::cout << std::endl;
+
 	for (int i = 0; i < node->children.size(); i++)
 	{
 		printTreeNode(node->children[i]);
@@ -118,6 +139,17 @@ std::vector<int> find_articulation_points(TreeNode *node)
 	return articulation_points;
 }
 
+template <typename T>
+bool contains(std::vector<T> vec, const T& elem)
+{
+	bool result = false;
+	if (std::find(vec.begin(), vec.end(), elem) != vec.end())
+	{
+		result = true;
+	}
+	return result;
+}
+
 int main()
 {
 	std::vector<std::vector<int>> adjacency_matrix = read_file("test/input.txt");
@@ -127,7 +159,7 @@ int main()
 	int curent_node = 0;
 	int time = 0;
 	int start_node_value = 0;
-    TreeNode* tree_root = new TreeNode(start_node_value, time);
+    TreeNode* tree_root = new TreeNode(start_node_value, -1, time);
 	visited_tree_node_map[start_node_value] = tree_root;
 	dfs_stack.push(tree_root);
 	while (dfs_stack.size() != 0)
@@ -140,7 +172,7 @@ int main()
 				if (visited_tree_node_map[i] == nullptr) 
 				{
 					time++;
-					TreeNode* child = new TreeNode(i, time);
+					TreeNode* child = new TreeNode(i, top->value, time);
 					//std::cout << top->value + 1 << "-" << child->value + 1 << std::endl;
 					dfs_stack.push(child);
 					visited_tree_node_map[i] = child;
@@ -150,7 +182,14 @@ int main()
 				else
 				{
 					TreeNode* back_edge = visited_tree_node_map[i];
-					top->back_edge.push_back(back_edge);
+					bool isNotChildren = !contains(top->children, back_edge);
+					bool isNotBackEdgeBackPath = !contains(back_edge->back_edge, top);
+					bool isNotBackPath = top->parent != i;
+					if (isNotChildren && isNotBackEdgeBackPath && isNotBackPath)
+					{
+						top->back_edge.push_back(back_edge);
+						std::cout << top->value + 1 << "-" << back_edge->value + 1 << std::endl;
+					}
 				}
 			}
 			if (i == adjacency_matrix.size() - 1)
@@ -162,6 +201,7 @@ int main()
 			}
 		}
 	}
+
 	printTreeNode(tree_root);
 	delete tree_root;
     return 0;
