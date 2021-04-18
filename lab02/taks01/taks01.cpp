@@ -59,6 +59,16 @@ void println(std::vector<std::vector<int>> matrix)
 	}
 }
 
+template <typename T>
+void println(std::vector<T> vector)
+{
+	for (int i = 0; i < vector.size(); i++)
+	{
+		std::cout << vector[i] << " ";
+	}
+	std::cout << std::endl;
+}
+
 struct TreeNode
 {
 	int value;
@@ -97,7 +107,8 @@ void printTreeNode(TreeNode *node)
 	}
 	for (int i = 0; i < node->back_edge.size(); i++)
 	{
-		std::cout << node->back_edge[i]->value + 1;
+		std::cout << node->back_edge[i]->value + 1 << "{"; 
+		std::cout << node->back_edge[i]->enter + 1 << ", " << node->back_edge[i]->exit + 1 << "}";
 		if (i < node->back_edge.size() - 1)
 		{
 			std::cout << ", ";
@@ -115,27 +126,70 @@ void printTreeNode(TreeNode *node)
 	}
 }
 
-std::vector<int> find_articulation_points(TreeNode *node)
+bool has_back_edge(TreeNode* node, int enter_time)
 {
-	std::vector<int> articulation_points;
-	int back_paths_count = 0;
 	std::stack<TreeNode*> dfs_stack;
 	dfs_stack.push(node);
 	while (dfs_stack.size() != 0)
 	{
 		TreeNode* top = dfs_stack.top();
-		for (int i = 0; i < node->back_edge.size(); i++)
+		dfs_stack.pop();
+		for (int i = 0; i < top->back_edge.size(); i++)
 		{
 			TreeNode* back_edge = top->back_edge[i];
-			if (back_edge->enter < top->enter)
+			if (back_edge->enter < enter_time)
 			{
-				back_paths_count++;
+				return true;
 			}
 		}
-
+		for (int i = 0; i < top->children.size(); i++)
+		{
+			dfs_stack.push(top->children[i]);
+		}
 	}
+	return false;
+}
 
+bool is_articulation_point(TreeNode* node)
+{
+	if (node->children.size() == 0)
+	{
+		return false;
+	}
+	bool is_articulation_point = false;
+	for (int i = 0; i < node->children.size(); i++)
+	{
+		is_articulation_point = is_articulation_point || !has_back_edge(node->children[i], node->enter);
+	}
+	return is_articulation_point;
+}
 
+std::vector<int> find_articulation_points(TreeNode *root)
+{
+	std::vector<int> articulation_points;
+	if (root->children.size() > 1)
+	{
+		articulation_points.push_back(root->value);
+	}
+	int back_paths_count = 0;
+	std::stack<TreeNode*> dfs_stack;
+	for (int i = 0; i < root->children.size(); i++)
+	{
+		dfs_stack.push(root->children[i]);
+	}
+	while (dfs_stack.size() != 0)
+	{
+		TreeNode* top = dfs_stack.top();
+		dfs_stack.pop();
+		if (is_articulation_point(top)) 
+		{
+			articulation_points.push_back(top->value + 1);
+		}
+		for (int i = 0; i < top->children.size(); i++)
+		{
+			dfs_stack.push(top->children[i]);
+		}
+	}
 	return articulation_points;
 }
 
@@ -150,10 +204,22 @@ bool contains(std::vector<T> vec, const T& elem)
 	return result;
 }
 
+void print_result(TreeNode *tree_root, std::vector<std::vector<int>> adjacency_matrix)
+{
+	std::cout << "----ADJACENCY MATRIX----" << std::endl;
+	println(adjacency_matrix);
+	std::cout << std::endl;
+	std::cout << "----DFS TREE----" << std::endl;
+	printTreeNode(tree_root);
+	std::cout << std::endl;
+	std::cout << "----ARICULATION POINTS----" << std::endl;
+	println(find_articulation_points(tree_root));
+	std::cout << std::endl;
+}
+
 int main()
 {
 	std::vector<std::vector<int>> adjacency_matrix = read_file("test/input.txt");
-	println(adjacency_matrix);
 	std::unordered_map<int, TreeNode*> visited_tree_node_map;
 	std::stack<TreeNode*> dfs_stack;
 	int curent_node = 0;
@@ -188,7 +254,7 @@ int main()
 					if (isNotChildren && isNotBackEdgeBackPath && isNotBackPath)
 					{
 						top->back_edge.push_back(back_edge);
-						std::cout << top->value + 1 << "-" << back_edge->value + 1 << std::endl;
+						//std::cout << top->value + 1 << "-" << back_edge->value + 1 << std::endl;
 					}
 				}
 			}
@@ -201,8 +267,7 @@ int main()
 			}
 		}
 	}
-
-	printTreeNode(tree_root);
+	print_result(tree_root, adjacency_matrix);
 	delete tree_root;
     return 0;
 }
