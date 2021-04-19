@@ -139,7 +139,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="taks01.cpp" />
+    <ClCompile Include="Task01.cpp" />
+    <ClCompile Include="TreeNode.cpp" />
+    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="taks01.h" />
