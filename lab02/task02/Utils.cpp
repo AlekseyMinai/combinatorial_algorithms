@@ -65,3 +65,19 @@ inline std::vector<std::vector<int>> read_file(std::string path)
 	}
 	return graph;
 }
+
+template <typename T>
+inline std::vector<std::vector<T>> transpose(std::vector<std::vector<T>> matrix)
+{
+	std::vector<std::vector<int>> transposed_matrix;
+	for (int i = 0; i < matrix.size(); i++)
+	{
+		std::vector<int> row;
+		for (int k = 0; k < matrix[i].size(); k++)
+		{
+			row.push_back(matrix[k][i]);
+		}
+		transposed_matrix.push_back(row);
+	}
+	return transposed_matrix;
+}
